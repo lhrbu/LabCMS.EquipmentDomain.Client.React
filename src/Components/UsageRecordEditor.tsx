@@ -15,11 +15,12 @@ const _timeFormateValidateHelper = new TimeFormatValidateHelper();
 const UsageRecordEditor: React.FC<{
     Record?: UsageRecord,
     OnSubmit? : (record:UsageRecord) => void
-}> = ({ Record,OnSubmit }) =>
+    OnCancel?:()=>void
+}> = ({ Record,OnSubmit,OnCancel }) =>
     {
         const [form] = Form.useForm();
         useEffect(()=>{
-            if(!Record)
+            if(Record)
             {
                 form.setFieldsValue(Record);
             }
@@ -141,7 +142,8 @@ const UsageRecordEditor: React.FC<{
         {
             if( window.confirm('Confirm to clear all the fields?'))
             {
-                form.resetFields()
+                form.setFieldsValue(new UsageRecord());
+                OnCancel?.();
             }
         }
     }

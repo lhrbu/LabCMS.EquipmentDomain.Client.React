@@ -1,5 +1,5 @@
 import React,{Fragment, useEffect, useState} from 'react';
-import { Table,Modal} from 'antd';
+import { Table,Modal, Button} from 'antd';
 import Column from 'antd/lib/table/Column';
 import ProjectProvider from '../Services/ProjectProvider';
 import UsageRecord from '../Models/UsageRecord';
@@ -22,6 +22,10 @@ export default function Records()
 {
     const [currentPageIndex,setCurrentPageIndex]=useState<number>(1);
     const [usageRecords,setUsageRecords] = useState<UsageRecord[]>([]);
+
+    const [inEditing,setInEditing]=useState<boolean>(false);
+    const [selectedRecord,setSelectedRecord]=useState<UsageRecord | null>(null);
+
     useEffect(()=>{
         FetchUsageRecords();
     },[]);
@@ -32,7 +36,13 @@ export default function Records()
             <Table
                 dataSource={usageRecords} 
                 rowKey="Id"
-                pagination={{position:["bottomCenter"],pageSize:_pageSize,current:currentPageIndex}}>
+                pagination={{position:["bottomCenter"],pageSize:_pageSize,current:currentPageIndex}}
+                rowSelection={{
+                    type:"radio",
+                    hideSelectAll:true,
+                    onSelect:OnRecordSelected
+                }}
+                >        
                 <Column title="User" dataIndex="User"
                     filters={GenerateFilterOptions(usageRecords.filter(item=>item.User?true:false).map(item=>item.User!))}
                     onFilter={(value, record) => (record as UsageRecord).User === value }
@@ -67,11 +77,39 @@ export default function Records()
                     />
             </Table>
 
-            <Modal>
-                <UsageRecordEditor />
+            <Modal
+                getContainer={false}
+                visible={inEditing}
+                title="Edit Usage Record"
+                onCancel={()=>setInEditing(false)}
+                footer={[
+                    <Button key="close" type="default" danger
+                        onClick={()=>setInEditing(false)}
+                        >Close</Button>
+                ]}
+                >
+                <UsageRecordEditor 
+                    Record={selectedRecord?selectedRecord:undefined}
+                    OnSubmit={OnEditorSubmitAsync}
+                    />
             </Modal>
+            <Button type='primary' onClick={TestEditor}>Edit</Button>
         </Fragment>
     );
+
+    function TestEditor()
+    {
+        const usageRecord = new UsageRecord();
+        usageRecord.Id="1";
+        usageRecord.User = "LR";
+        usageRecord.EquipmentNo="01-01";
+        usageRecord.StartTime=12345;
+        usageRecord.EndTime=23456;
+        usageRecord.ProjectName="hahaha";
+        usageRecord.TestType="Type2";
+        setSelectedRecord(usageRecord);
+        setInEditing(true);
+    }
 
     async function FetchUsageRecords()
     {
@@ -94,5 +132,18 @@ export default function Records()
     function GenerateFilterOptions<TOption>(optionValues:TOption[])
     {
         return (distinct(optionValues) as TOption[]).sort().map(optionValue=>{return { text: optionValue, value: optionValue }});
+    }
+
+    async function OnEditorSubmitAsync(editedRecord:UsageRecord)
+    {
+        setInEditing(false);
+        editedRecord.Id = selectedRecord!.Id;
+        await _usageRecordsWebAPI.PutAsync(editedRecord);
+        setSelectedRecord(null);
+    }
+
+    function OnRecordSelected(usageRecord:UsageRecord)
+    {
+        setSelectedRecord(usageRecord);
     }
 }
