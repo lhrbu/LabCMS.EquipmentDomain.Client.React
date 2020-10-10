@@ -2,8 +2,8 @@ import React from 'react';
 import { Layout, Menu } from 'antd';
 import { BrowserRouter, Link, Route, Switch } from 'react-router-dom';
 import './App.css';
-import UsageRecordEditor from './Components/UsageRecordEditor';
 import AddRecord from './Pages/AddRecord';
+import Records from './Pages/Records';
 
 const { Header, Content, Footer } = Layout;
 
@@ -25,6 +25,9 @@ function App()
             <Switch>
               <Route exact path='/AddRecord'>
                 <AddRecord />
+              </Route>
+              <Route exact path='/Records'>
+                <Records />
               </Route>
               <Route path='/'>
                 Home Page

@@ -1,6 +1,4 @@
-import React, { Fragment } from 'react';
-import UsageRecord from '../Models/UsageRecord';
-import { Table } from 'antd';
+import React from 'react';
 import UsageRecordEditor from '../Components/UsageRecordEditor';
 import UsageRecordsWebAPI from '../WebAPIs/UsageRecordsWebAPI';
 
