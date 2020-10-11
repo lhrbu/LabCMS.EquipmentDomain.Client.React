@@ -7,7 +7,7 @@ export default class ProjectProvider
     public GetProject(usageRecord:UsageRecord) : Project | null
     {
         const _cacheService = ProjectsWebCacheService.Instance();
-        let result = _cacheService.CachedProjects.find(item=>item.Name===usageRecord.ProjectName);
+        let result = _cacheService.CachedProjects.find(item=>item.FullName===usageRecord.ProjectName);
         return result?result:null;
     }
 }

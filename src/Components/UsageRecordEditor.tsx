@@ -3,26 +3,30 @@ import { Modal, Form, Input, Select, Button } from 'antd';
 import UsageRecord from '../Models/UsageRecord';
 import EquipmentHourlyRatesWebCacheService from '../Services/EquipmentHourlyRatesWebCacheService';
 import ProjectsWebCacheService from '../Services/ProjectsWebCacheService';
-import TimeStampStringConverter from '../Services/TimeStampStringConverter';
 import TimeFormatValidateHelper from '../Services/TimeFormatValidateHelper';
 
 const { Option } = Select;
 const _equipmentHourlyRatesCache = EquipmentHourlyRatesWebCacheService.Instance();
 const _projectsWebCache = ProjectsWebCacheService.Instance();
-const _timeStampStringConverter = new TimeStampStringConverter();
 const _timeFormateValidateHelper = new TimeFormatValidateHelper();
 
 const UsageRecordEditor: React.FC<{
     Record?: UsageRecord,
-    OnSubmit? : (record:UsageRecord) => void
-    OnCancel?:()=>void
+    OnSubmit? : (record:UsageRecord) => Promise<void>
+    OnCancel?:()=>Promise<void>
 }> = ({ Record,OnSubmit,OnCancel }) =>
     {
         const [form] = Form.useForm();
+        const [submitButtonLoading,setSubmitButtonLoading]=useState<boolean | undefined>(undefined);
+
         useEffect(()=>{
             if(Record)
             {
                 form.setFieldsValue(Record);
+                form.setFieldsValue({
+                    StartTimeString:_timeFormateValidateHelper.RenderTimeStamp(Record.StartTime!),
+                    EndTimeString:_timeFormateValidateHelper.RenderTimeStamp(Record.EndTime!)
+                });
             }
         },[Record]);
 
@@ -81,7 +85,7 @@ const UsageRecordEditor: React.FC<{
                     label="Project Name"
                     rules={[{
                         required: true,
-                        validator: (_, value: string) => _projectsWebCache.ContainsName(value) ? Promise.resolve() : Promise.reject("Project name is invalid."),
+                        validator: (_, value: string) => _projectsWebCache.ContainsFullName(value) ? Promise.resolve() : Promise.reject("Project name is invalid."),
                         message: "Project name is invalid."
                     }]}
                 >
@@ -89,13 +93,13 @@ const UsageRecordEditor: React.FC<{
                         onSearch={(value) => form.setFieldsValue({ ProjectName: value })}>
                         {
                             _projectsWebCache.CachedProjects.map(
-                                info => <Option value={info.Name!} key={info.No!}>{info.Name}</Option>)
+                                project => <Option value={project.FullName!} key={project.No!}>{project.FullName}</Option>)
                         }
                     </Select>
                 </Form.Item>
 
                 <Form.Item
-                    name="StartTime"
+                    name="StartTimeString"
                     label="Start Time"
                     rules={[{ required: true, pattern: /^\d{4}\/\d{1,2}\/\d{1,2}\s\d{1,2}:\d{1,2}$/, message: 'Time format does not match yyyy/MM/dd HH:mm' }]}
                 >
@@ -103,7 +107,7 @@ const UsageRecordEditor: React.FC<{
                 </Form.Item>
 
                 <Form.Item
-                    name="EndTime"
+                    name="EndTimeString"
                     label="End Time"
                     rules={[{ required: true, pattern: /^\d{4}\/\d{1,2}\/\d{1,2}\s\d{1,2}:\d{1,2}$/, message: 'Time format does not match yyyy/MM/dd HH:mm' }]}
                 >
@@ -112,6 +116,7 @@ const UsageRecordEditor: React.FC<{
 
                 <Form.Item wrapperCol={{offset: 8, span: 16}}>
                     <Button type="primary" htmlType="submit" onClick={SubmitAsync}
+                        loading={submitButtonLoading}
                         style={{marginRight:"4px"}}>
                         Submit
                     </Button>
@@ -124,18 +129,13 @@ const UsageRecordEditor: React.FC<{
 
         async function SubmitAsync ()
         {
+            setSubmitButtonLoading(true);
             const values =await form.validateFields();
-            const usageRecord = new UsageRecord();
-            usageRecord.User = values.User;
-            usageRecord.TestNo = values.TestNo;
-            usageRecord.TestType = values.TestType;
-            usageRecord.EquipmentNo = values.EquipmentNo;
-            usageRecord.ProjectName = values.ProjectName;
-            usageRecord.StartTime = _timeStampStringConverter.ToUnixTimeSeconds(values.StartTime,
-                _timeFormateValidateHelper.TimeFormat);
-            usageRecord.EndTime = _timeStampStringConverter.ToUnixTimeSeconds(values.EndTime,
-                _timeFormateValidateHelper.TimeFormat);
-            OnSubmit?.(usageRecord);
+            const usageRecord:UsageRecord = Object.assign(new UsageRecord(),values);
+            usageRecord.StartTime = _timeFormateValidateHelper.GetTimeStampValue(values.StartTimeString);
+            usageRecord.EndTime = _timeFormateValidateHelper.GetTimeStampValue(values.EndTimeString);
+            await OnSubmit?.(usageRecord);
+            setSubmitButtonLoading(undefined);
         };
 
         function ResetForm()

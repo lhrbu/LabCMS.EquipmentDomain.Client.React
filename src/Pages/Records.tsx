@@ -7,19 +7,23 @@ import TimeFormatValidateHelper from '../Services/TimeFormatValidateHelper';
 import TimeStampStringConverter from '../Services/TimeStampStringConverter';
 import UsageRecordsWebAPI from '../WebAPIs/UsageRecordsWebAPI';
 import UsageRecordEditor from '../Components/UsageRecordEditor';
+import { TablePaginationConfig } from 'antd/lib/table';
+import UsageRecordLocalCacheService from '../Services/UsageRecordLocalCacheService';
+import TableGenerator from '../Services/TableGenerator';
 
 const distinct = require('distinct');
 
 const _tableHeader = <div style={{backgroundColor:"#305496",color:"white",padding:"0.5rem"}}>HJL-NL-DV Test equipment usage record 2020</div>
 const _projectProvider=new ProjectProvider();
 const _timeFormatValidateHelper = new TimeFormatValidateHelper();
-const _timeStampStringConverter = new TimeStampStringConverter();
 const _pageSize = 20;
 
 const _usageRecordsWebAPI = new UsageRecordsWebAPI();
 
 export default function Records()
 {
+    const _localCacheService = UsageRecordLocalCacheService.Instance();
+
     const [currentPageIndex,setCurrentPageIndex]=useState<number>(1);
     const [usageRecords,setUsageRecords] = useState<UsageRecord[]>([]);
 
@@ -30,18 +34,24 @@ export default function Records()
         FetchUsageRecords();
     },[]);
 
+
+
     return (
         <Fragment>
+            
             {_tableHeader}
             <Table
                 dataSource={usageRecords} 
                 rowKey="Id"
-                pagination={{position:["bottomCenter"],pageSize:_pageSize,current:currentPageIndex}}
+                pagination={{position:["bottomCenter"],pageSize:_pageSize,current:currentPageIndex,
+                            onChange:index=>setCurrentPageIndex(index)}}
                 rowSelection={{
                     type:"radio",
                     hideSelectAll:true,
                     onSelect:OnRecordSelected
                 }}
+                bordered 
+                size='small'
                 >        
                 <Column title="User" dataIndex="User"
                     filters={GenerateFilterOptions(usageRecords.filter(item=>item.User?true:false).map(item=>item.User!))}
@@ -65,15 +75,15 @@ export default function Records()
                     />
                 <Column title="Project No"
                     filters={GenerateFilterOptions(usageRecords.filter(item=>item.ProjectName?true:false).map(item=>_projectProvider.GetProject(item)!.No!))}
-                    onFilter={(value, record) => _projectProvider.GetProject(record as UsageRecord)!.No === value }
-                    render={(_,usageRecord)=>usageRecord?_projectProvider.GetProject(usageRecord as UsageRecord)?.Name:null}
+                    onFilter={(value, record) => _projectProvider.GetProject(record as UsageRecord)?.No === value }
+                    render={(_,usageRecord)=>usageRecord?_projectProvider.GetProject(usageRecord as UsageRecord)?.No:null}
                     />
                 <Column title="Start Time" dataIndex="StartTime" 
-                    render={timeStampValue=>timeStampValue?RenderTimeStamp(timeStampValue as number):null}/>
+                    render={timeStampValue=>timeStampValue?_timeFormatValidateHelper.RenderTimeStamp(timeStampValue as number):null}/>
                 <Column title="End Time" dataIndex="EndTime" 
-                    render={timeStampValue=>timeStampValue?RenderTimeStamp(timeStampValue as number):null}/>
+                    render={timeStampValue=>timeStampValue?_timeFormatValidateHelper.RenderTimeStamp(timeStampValue as number):null}/>
                 <Column title="Duration" 
-                    render={(_,usageRecord)=>usageRecord?UsageRecord.GetDuration(usageRecord as UsageRecord):null}
+                    render={(_,usageRecord)=>usageRecord?GetAndRenderDuration(usageRecord as UsageRecord):null}
                     />
             </Table>
 
@@ -90,26 +100,23 @@ export default function Records()
                 >
                 <UsageRecordEditor 
                     Record={selectedRecord?selectedRecord:undefined}
-                    OnSubmit={OnEditorSubmitAsync}
+                    OnSubmit={OnEditorSubmitEditedRecordAsync}
                     />
             </Modal>
-            <Button type='primary' onClick={TestEditor}>Edit</Button>
+            <Button type='primary' disabled={selectedRecord?false:true}
+                onClick={()=>{setInEditing(true)}}
+                >Edit</Button>
+             <Button  type='primary' disabled={selectedRecord?false:true}
+                onClick={()=>{if(selectedRecord){
+                    _localCacheService.SetCache(selectedRecord);
+                    window.alert(`Usage record of ${selectedRecord.TestNo} is copied`);
+                }}}
+                style={{marginLeft:'4px',backgroundColor:selectedRecord?'green':undefined}}
+                >Copy</Button>
         </Fragment>
     );
 
-    function TestEditor()
-    {
-        const usageRecord = new UsageRecord();
-        usageRecord.Id="1";
-        usageRecord.User = "LR";
-        usageRecord.EquipmentNo="01-01";
-        usageRecord.StartTime=12345;
-        usageRecord.EndTime=23456;
-        usageRecord.ProjectName="hahaha";
-        usageRecord.TestType="Type2";
-        setSelectedRecord(usageRecord);
-        setInEditing(true);
-    }
+    
 
     async function FetchUsageRecords()
     {
@@ -118,27 +125,14 @@ export default function Records()
         setCurrentPageIndex(GetPageCount(usageRecords.length,_pageSize));
     }
 
-    function RenderTimeStamp(timeStampValue:number)
-    {
-        return _timeStampStringConverter.FromUnixTimeSeconds(timeStampValue,
-            _timeFormatValidateHelper.TimeFormat);
-    }
-
-    function GetPageCount(num:number,pageSize:number)
-    {
-        return num%pageSize===0?num/pageSize:num/pageSize+1;
-    }
-
-    function GenerateFilterOptions<TOption>(optionValues:TOption[])
-    {
-        return (distinct(optionValues) as TOption[]).sort().map(optionValue=>{return { text: optionValue, value: optionValue }});
-    }
-
-    async function OnEditorSubmitAsync(editedRecord:UsageRecord)
+    async function OnEditorSubmitEditedRecordAsync(editedRecord:UsageRecord)
     {
         setInEditing(false);
         editedRecord.Id = selectedRecord!.Id;
         await _usageRecordsWebAPI.PutAsync(editedRecord);
+        const index = usageRecords.findIndex(record=>record.Id===selectedRecord!.Id) ;
+        usageRecords[index]=editedRecord;
+        setUsageRecords([...usageRecords]);
         setSelectedRecord(null);
     }
 
@@ -146,4 +140,22 @@ export default function Records()
     {
         setSelectedRecord(usageRecord);
     }
+}
+
+//pure functions:
+
+function GetPageCount(num: number, pageSize: number)
+{
+    return num % pageSize === 0 ? num / pageSize : num / pageSize + 1;
+}
+
+function GetAndRenderDuration(usageRecord: UsageRecord)
+{
+    const duration = UsageRecord.GetDuration(usageRecord);
+    return Number.isInteger(duration) ? duration : duration.toFixed(2);
+}
+
+function GenerateFilterOptions<TOption>(optionValues: TOption[])
+{
+    return (distinct(optionValues) as TOption[]).sort().map(optionValue => { return { text: optionValue, value: optionValue } });
 }

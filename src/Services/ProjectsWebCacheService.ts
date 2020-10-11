@@ -20,9 +20,9 @@ export default class ProjectsWebCacheService
         this._cachedProjects = await webAPI.GetAsync();
     }
 
-    public ContainsName(projectName:string)
+    public ContainsFullName(projectName:string)
     {
-        return this._cachedProjects.some(item=>item.Name==projectName);
+        return this._cachedProjects.some(item=>item.FullName==projectName);
     }
     
 }

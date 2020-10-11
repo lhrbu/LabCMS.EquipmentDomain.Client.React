@@ -1,3 +1,4 @@
+import useBreakpoint from 'antd/lib/grid/hooks/useBreakpoint';
 import moment from 'moment';
 
 export default class UsageRecord
@@ -19,5 +20,4 @@ export default class UsageRecord
             throw new Error("Wrong Timestamp format");
         }
     }
-
 }
