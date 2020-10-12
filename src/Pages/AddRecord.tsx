@@ -4,10 +4,10 @@ import UsageRecord from '../Models/UsageRecord';
 import UsageRecordsWebAPI from '../WebAPIs/UsageRecordsWebAPI';
 import UsageRecordLocalCacheService from '../Services/UsageRecordLocalCacheService';
 
-const _usageRecordsWebAPI = new UsageRecordsWebAPI();
+
 export default function AddRecord()
 {
-
+    const _usageRecordsWebAPI = new UsageRecordsWebAPI();
     const _localCache = UsageRecordLocalCacheService.Instance();
     let record:UsageRecord | undefined = undefined;
     if(_localCache.HasCache())

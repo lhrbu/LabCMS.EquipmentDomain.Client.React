@@ -1,27 +1,25 @@
 import React,{Fragment, useEffect, useState} from 'react';
 import { Table,Modal, Button} from 'antd';
-import Column from 'antd/lib/table/Column';
 import ProjectProvider from '../Services/ProjectProvider';
 import UsageRecord from '../Models/UsageRecord';
 import TimeFormatValidateHelper from '../Services/TimeFormatValidateHelper';
-import TimeStampStringConverter from '../Services/TimeStampStringConverter';
 import UsageRecordsWebAPI from '../WebAPIs/UsageRecordsWebAPI';
 import UsageRecordEditor from '../Components/UsageRecordEditor';
-import { TablePaginationConfig } from 'antd/lib/table';
 import UsageRecordLocalCacheService from '../Services/UsageRecordLocalCacheService';
-import TableGenerator from '../Services/TableGenerator';
 
 const distinct = require('distinct');
+const {Column} = Table;
 
 const _tableHeader = <div style={{backgroundColor:"#305496",color:"white",padding:"0.5rem"}}>HJL-NL-DV Test equipment usage record 2020</div>
-const _projectProvider=new ProjectProvider();
-const _timeFormatValidateHelper = new TimeFormatValidateHelper();
 const _pageSize = 20;
 
-const _usageRecordsWebAPI = new UsageRecordsWebAPI();
+
 
 export default function Records()
 {
+    const _usageRecordsWebAPI = new UsageRecordsWebAPI();
+    const _projectProvider=new ProjectProvider();
+    const _timeFormatValidateHelper = new TimeFormatValidateHelper();
     const _localCacheService = UsageRecordLocalCacheService.Instance();
 
     const [currentPageIndex,setCurrentPageIndex]=useState<number>(1);

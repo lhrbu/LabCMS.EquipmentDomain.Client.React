@@ -22,6 +22,6 @@ export default class EquipmentHourlyRatesWebCacheService
 
     public ContainsNo(equipmentNo:string)
     {
-        return this._cachedEquipmentHourlyRates.some(item=>item.EquipmentNo==equipmentNo)
+        return this._cachedEquipmentHourlyRates.some(item=>item.EquipmentNo===equipmentNo)
     }
 }

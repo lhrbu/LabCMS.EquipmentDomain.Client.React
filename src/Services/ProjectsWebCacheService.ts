@@ -7,8 +7,6 @@ export default class ProjectsWebCacheService
     private constructor(){}
     public static Instance(){return this._instance;}
 
-    private readonly _gateWayUrl = "http://localhost:5050"
-
     private _cachedProjects:Project[] = [];
     public get CachedProjects() : Project[] {
         return this._cachedProjects;
@@ -22,7 +20,7 @@ export default class ProjectsWebCacheService
 
     public ContainsFullName(projectName:string)
     {
-        return this._cachedProjects.some(item=>item.FullName==projectName);
+        return this._cachedProjects.some(item=>item.FullName===projectName);
     }
     
 }
