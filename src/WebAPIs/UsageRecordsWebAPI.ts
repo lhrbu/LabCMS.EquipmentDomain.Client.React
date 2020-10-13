@@ -12,7 +12,7 @@ export default class UsageRecordsWebAPI
     }
     public async PostAsync(usageRecord:UsageRecord)
     {
-        await Axios.post(this._url,usageRecord,{params:{date:new Date()}});
+        return (await Axios.post(this._url,usageRecord,{params:{date:new Date()}})).status;
     }
     public async PutAsync(usageRecord:UsageRecord)
     {

@@ -20,8 +20,12 @@ export default function AddRecord()
 
     async function OnSubmitNewRecordAsync(usageRecord:UsageRecord)
     {
-        await _usageRecordsWebAPI.PostAsync(usageRecord)
-        window.alert(`New usage record of ${usageRecord.TestNo} is added.`);
+        const status = await _usageRecordsWebAPI.PostAsync(usageRecord);
+        if(status==200){
+            window.alert(`New usage record of ${usageRecord.TestNo} is added.`);
+        }else{
+            window.alert('Failed to add the usage record');
+        }
     }
 }
 
