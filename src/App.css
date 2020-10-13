@@ -1,3 +1,5 @@
+@import '~antd/dist/antd.compact.css';
+
 .site-layout-content {
     background: #fff;
     padding: 16px;

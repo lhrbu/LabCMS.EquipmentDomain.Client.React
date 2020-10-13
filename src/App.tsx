@@ -5,19 +5,25 @@ import './App.css';
 import AddRecord from './Pages/AddRecord';
 import Records from './Pages/Records';
 import DynamicQuery from './Pages/DynamicQuery';
+import Home from './Pages/Home';
+import {HomeFilled,PlusCircleFilled,ProfileFilled,
+  FileExcelFilled,CodeFilled, SaveFilled} from '@ant-design/icons';
 
 const { Header, Content, Footer } = Layout;
 function App()
 {
+
   return (
     <Layout className="layout">
       <BrowserRouter>
         <Header>
-          <Menu theme="dark" mode="horizontal" defaultSelectedKeys={["1"]}>
-            <Menu.Item key="1"><Link to='/'>Home</Link></Menu.Item>
-            <Menu.Item key="2"><Link to='/AddRecord'>Add Record</Link></Menu.Item>
-            <Menu.Item key="3"><Link to='/Records'>Records</Link></Menu.Item>
-            <Menu.Item key="4"><Link to='/DynamicQuery'>Query</Link></Menu.Item>
+          <Menu theme="dark" mode="horizontal" defaultSelectedKeys={[window.location.pathname]} style={{fontSize:'16px'}}
+            >
+            <Menu.Item key="/"><Link to='/'><HomeFilled />Home</Link></Menu.Item>
+            <Menu.Item key="/AddRecord"><Link to='/AddRecord'><PlusCircleFilled />Add Record</Link></Menu.Item>
+            <Menu.Item key="/Records"><Link to='/Records'><ProfileFilled />Records</Link></Menu.Item>
+            <Menu.Item key="/api/UsageRecords/ExcelInterop"><a href='/api/UsageRecords/ExcelInterop' target="_blank"><SaveFilled />Excel</a></Menu.Item>
+            <Menu.Item key="/DynamicQuery"><Link to='/DynamicQuery'><CodeFilled />Query</Link></Menu.Item>
           </Menu>
         </Header>
         <Content style={{ padding: '0 28px' }}>
@@ -35,7 +41,7 @@ function App()
                 <DynamicQuery />
               </Route>
               <Route path='/'>
-                Home Page
+                <Home />
             </Route>
             </Switch>
           </div>

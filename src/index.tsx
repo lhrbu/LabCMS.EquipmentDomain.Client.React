@@ -19,8 +19,11 @@ async function Initialize()
       _projectsWebCacheService.RefreshCacheAsync(),
       _equipmentHourlyRateWebCacheService.RefreshCacheAsync()]);
   } catch (error) {
-    
+    window.alert("Can't load project or equipment hourly rate information.");
   }
+
+
+
    ReactDOM.render(
     <React.StrictMode>
       <App />

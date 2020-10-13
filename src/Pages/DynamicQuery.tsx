@@ -20,6 +20,7 @@ export default function DynamicQuery()
 {
     const [collapseKey,setCollapseKey]=useState<string[]>(['QueryCodePanel']);
 
+    const [queryLoading,setQueryLoading]=useState<boolean>(false);
     const [code,setCode]=useState<string>("");
     const [queryResult,setQueryResult]=useState<any[]>([]);
     const data = [
@@ -38,12 +39,13 @@ export default function DynamicQuery()
                     <Paragraph />
                     <Paragraph keyboard>......</Paragraph>
                     <Paragraph />
-                    <Paragraph keyboard>public IEnumerable{"<"}dynamic{">"} DynamicQuery(IEnumerable usageRecords)</Paragraph>
+                    <Paragraph><Text type="danger">// The return type must be a collection type!</Text></Paragraph>
+                    <Paragraph keyboard>public dynamic DynamicQuery(IEnumerable usageRecords)</Paragraph>
                     <Paragraph keyboard>{"{"}</Paragraph>
-                    <TextArea autoSize={{ minRows: 5 }} value={code} onChange={e => setCode(e.target.value)} />
+                    <TextArea autoSize={{ minRows: 4 }} value={code} onChange={e => setCode(e.target.value)} />
                     <Paragraph keyboard>{"}"}</Paragraph>
-                    <Button type="primary"
-                        onClick={async() => {setQueryResult(await GetQueryResult(code));setCollapseKey(["QueryResult"]);}}>
+                    <Button type="primary" loading={queryLoading}
+                        onClick={async()=>await OnQueryAsync(code)}>
                             Query</Button>
                     <Button type="primary" danger
                         onClick={()=>setCode("")}
@@ -57,18 +59,22 @@ export default function DynamicQuery()
             </Collapse>
         </Fragment>
         );
+
+        async function OnQueryAsync(code:string)
+        {
+            setQueryLoading(true);
+            setQueryResult(await GetQueryResult(code));
+            setCollapseKey(["QueryResult"]);
+            setQueryLoading(false);
+        }
 }
 
 
 
 async function GetQueryResult(code:string)
 {
-    // const _dynamicQueryWebAPI = new UsageRecordDyamicQueryWebAPI();
-    // return await _dynamicQueryWebAPI.PostAsync(code);
-    return [
-        {A:1,B:"Haha"},
-        {A:2,B:"Hehe"}
-    ];
+    const _dynamicQueryWebAPI = new UsageRecordDyamicQueryWebAPI();
+    return await _dynamicQueryWebAPI.PostAsync(JSON.stringify(code));
 }
 
 const GenerateResultsTable: React.FC<{Items?:any[]}>

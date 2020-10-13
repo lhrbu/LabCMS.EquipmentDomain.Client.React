@@ -17,7 +17,7 @@ const UsageRecordEditor: React.FC<{
 }> = ({ Record,OnSubmit,OnCancel }) =>
     {
         const [form] = Form.useForm();
-        const [submitButtonLoading,setSubmitButtonLoading]=useState<boolean | undefined>(undefined);
+        const [submitButtonLoading,setSubmitButtonLoading]=useState<boolean>(false);
 
         useEffect(()=>{
             if(Record)
@@ -130,12 +130,16 @@ const UsageRecordEditor: React.FC<{
         async function SubmitAsync ()
         {
             setSubmitButtonLoading(true);
-            const values =await form.validateFields();
-            const usageRecord:UsageRecord = Object.assign(new UsageRecord(),values);
-            usageRecord.StartTime = _timeFormateValidateHelper.GetTimeStampValue(values.StartTimeString);
-            usageRecord.EndTime = _timeFormateValidateHelper.GetTimeStampValue(values.EndTimeString);
-            await OnSubmit?.(usageRecord);
-            setSubmitButtonLoading(undefined);
+            try
+            {
+                const values = await form.validateFields();
+                const usageRecord: UsageRecord = Object.assign(new UsageRecord(), values);
+                usageRecord.StartTime = _timeFormateValidateHelper.GetTimeStampValue(values.StartTimeString);
+                usageRecord.EndTime = _timeFormateValidateHelper.GetTimeStampValue(values.EndTimeString);
+                await OnSubmit?.(usageRecord);
+            }finally{
+                setSubmitButtonLoading(false);
+            }
         };
 
         function ResetForm()

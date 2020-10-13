@@ -6,12 +6,13 @@ import TimeFormatValidateHelper from '../Services/TimeFormatValidateHelper';
 import UsageRecordsWebAPI from '../WebAPIs/UsageRecordsWebAPI';
 import UsageRecordEditor from '../Components/UsageRecordEditor';
 import UsageRecordLocalCacheService from '../Services/UsageRecordLocalCacheService';
+import Project from '../Models/Project';
 
 const distinct = require('distinct');
 const {Column} = Table;
 
 const _tableHeader = <div style={{backgroundColor:"#305496",color:"white",padding:"0.5rem"}}>HJL-NL-DV Test equipment usage record 2020</div>
-const _pageSize = 20;
+const _pageSize = 12;
 
 
 
@@ -21,6 +22,8 @@ export default function Records()
     const _projectProvider=new ProjectProvider();
     const _timeFormatValidateHelper = new TimeFormatValidateHelper();
     const _localCacheService = UsageRecordLocalCacheService.Instance();
+
+    const [tableLoading,setTableLoading]=useState<boolean>(true);
 
     const [currentPageIndex,setCurrentPageIndex]=useState<number>(1);
     const [usageRecords,setUsageRecords] = useState<UsageRecord[]>([]);
@@ -40,8 +43,9 @@ export default function Records()
             {_tableHeader}
             <Table
                 dataSource={usageRecords} 
+                loading={tableLoading}
                 rowKey="Id"
-                pagination={{position:["bottomCenter"],pageSize:_pageSize,current:currentPageIndex,
+                pagination={{position:["bottomCenter"],defaultPageSize:_pageSize,current:currentPageIndex,
                             onChange:index=>setCurrentPageIndex(index)}}
                 rowSelection={{
                     type:"radio",
@@ -72,7 +76,8 @@ export default function Records()
                      onFilter={(value, record) => (record as UsageRecord).ProjectName === value }
                     />
                 <Column title="Project No"
-                    filters={GenerateFilterOptions(usageRecords.filter(item=>item.ProjectName?true:false).map(item=>_projectProvider.GetProject(item)!.No!))}
+                    filters={GenerateFilterOptions(usageRecords.filter(item=>item.ProjectName?true:false).map(item=>_projectProvider.GetProject(item)!.No??"Empty"))}
+                    //filters={GenerateFilterOptions(FilterProjectNos(usageRecords))}
                     onFilter={(value, record) => _projectProvider.GetProject(record as UsageRecord)?.No === value }
                     render={(_,usageRecord)=>usageRecord?_projectProvider.GetProject(usageRecord as UsageRecord)?.No:null}
                     />
@@ -121,6 +126,7 @@ export default function Records()
         const usageRecords = await _usageRecordsWebAPI.GetAsync();
         setUsageRecords([...usageRecords]);
         setCurrentPageIndex(GetPageCount(usageRecords.length,_pageSize));
+        setTableLoading(false);
     }
 
     async function OnEditorSubmitEditedRecordAsync(editedRecord:UsageRecord)
@@ -138,13 +144,21 @@ export default function Records()
     {
         setSelectedRecord(usageRecord);
     }
+
+    function FilterProjectNos(usageRecords:UsageRecord[])
+    {
+        const meaningRecords = usageRecords.filter(item=>item.ProjectName?true:false);
+        const projects:Project[]=meaningRecords.map(item=>_projectProvider.GetProject(item))
+            .filter(project=>project?true:false) as Project[];
+        return projects.map(project=>project.No?project.No:'Empty');
+    }
 }
 
 //pure functions:
 
 function GetPageCount(num: number, pageSize: number)
 {
-    return num % pageSize === 0 ? num / pageSize : num / pageSize + 1;
+    return num % pageSize === 0 ? Math.floor(num / pageSize) : Math.ceil(num / pageSize);
 }
 
 function GetAndRenderDuration(usageRecord: UsageRecord)
