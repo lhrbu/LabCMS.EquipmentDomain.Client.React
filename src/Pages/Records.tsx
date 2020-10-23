@@ -116,6 +116,15 @@ export default function Records()
                 }}}
                 style={{marginLeft:'4px',backgroundColor:selectedRecord?'green':undefined}}
                 >Copy</Button>
+            <Button type="primary" danger disabled={selectedRecord?false:true}
+                onClick={async()=>{
+                    if(selectedRecord && selectedRecord.Id){
+                        await _usageRecordsWebAPI.DeleteByIdAsync(selectedRecord.Id);
+                    }
+                }}
+                style={{marginLeft:'4px'}}>
+                Delele
+            </Button>
         </Fragment>
     );
 
