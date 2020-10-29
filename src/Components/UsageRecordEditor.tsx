@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Modal, Form, Input, Select, Button } from 'antd';
 import UsageRecord from '../Models/UsageRecord';
 import EquipmentHourlyRatesWebCacheService from '../Services/EquipmentHourlyRatesWebCacheService';
 import ProjectsWebCacheService from '../Services/ProjectsWebCacheService';
 import TimeFormatValidateHelper from '../Services/TimeFormatValidateHelper';
+import moment from 'moment';
 
 const { Option } = Select;
 const _equipmentHourlyRatesCache = EquipmentHourlyRatesWebCacheService.Instance();
@@ -26,6 +27,11 @@ const UsageRecordEditor: React.FC<{
                 form.setFieldsValue({
                     StartTimeString:_timeFormateValidateHelper.RenderTimeStamp(Record.StartTime!),
                     EndTimeString:_timeFormateValidateHelper.RenderTimeStamp(Record.EndTime!)
+                });
+            }else{
+                form.setFieldsValue({
+                    StartTimeString:_timeFormateValidateHelper.RenderTimeStamp(moment().unix()),
+                    EndTimeString:_timeFormateValidateHelper.RenderTimeStamp(moment().unix())
                 });
             }
         },[Record]);

@@ -1,4 +1,5 @@
 import Axios from "axios";
+import { url } from "inspector";
 import UsageRecord from '../Models/UsageRecord';
 
 export default class UsageRecordsWebAPI
@@ -20,7 +21,7 @@ export default class UsageRecordsWebAPI
     }
     public async DeleteByIdAsync(id:string)
     {
-        const idUrl:string = `${this._url}/${id}`;
-        await Axios.delete(idUrl,{params:{date:new Date()}});
+        const idUrl:string = encodeURI(`${this._url}/${id}`);
+        await Axios.delete(idUrl);
     }
 }
