@@ -119,7 +119,11 @@ export default function Records()
             <Button type="primary" danger disabled={selectedRecord?false:true}
                 onClick={async()=>{
                     if(selectedRecord && selectedRecord.Id){
-                        await _usageRecordsWebAPI.DeleteByIdAsync(selectedRecord.Id);
+                        if( window.confirm(`Sure to delete ${selectedRecord.TestNo} ?`) )
+                        {
+                            await _usageRecordsWebAPI.DeleteByIdAsync(selectedRecord.Id);
+                            setUsageRecords([...usageRecords.filter(item=>item.Id!==selectedRecord.Id)]);
+                        }
                     }
                 }}
                 style={{marginLeft:'4px'}}>
