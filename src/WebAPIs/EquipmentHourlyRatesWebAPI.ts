@@ -9,4 +9,13 @@ export default class EquipmentHourlysRatesWebAPI
     {
         return (await Axios.get(this._url,{params:{date:new Date()}})).data as EquipmentHourlyRate[];
     }
+
+    public async PostAsync(equipmentHourlyRate:EquipmentHourlyRate)
+    {
+        await Axios.post(this._url,equipmentHourlyRate,{params:{date:new Date()}});
+    }
+    public async PutAsync(equipmentHourlyRate:EquipmentHourlyRate)
+    {
+        await Axios.put(this._url,equipmentHourlyRate,{params:{date:new Date()}});
+    }
 }

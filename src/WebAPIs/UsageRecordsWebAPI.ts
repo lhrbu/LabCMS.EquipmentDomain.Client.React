@@ -24,4 +24,9 @@ export default class UsageRecordsWebAPI
         const idUrl:string = encodeURI(`${this._url}/${id}`);
         await Axios.delete(idUrl);
     }
+
+    public async ReloadCacheAsync()
+    {
+        await Axios.get('/api/ReloadCache',{params:{date:new Date()}});
+    }
 }

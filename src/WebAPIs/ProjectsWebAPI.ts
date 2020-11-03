@@ -8,4 +8,12 @@ export default class ProjectsWebAPI
     {
         return (await Axios.get(this._url,{params:{date:new Date()}})).data as Project[];
     }
+    public async PostAsync(project:Project)
+    {
+        await Axios.post(this._url,project,{params:{date:new Date()}});
+    }
+    public async PutAsync(project:Project)
+    {
+        await Axios.put(this._url,project,{params:{date:new Date()}});
+    }
 }

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { RefObject, useEffect, useRef, useState } from 'react';
 import { Layout, Menu } from 'antd';
 import { BrowserRouter, Link, Route, Switch } from 'react-router-dom';
 import './App.css';
@@ -6,12 +6,18 @@ import AddRecord from './Pages/AddRecord';
 import Records from './Pages/Records';
 import DynamicQuery from './Pages/DynamicQuery';
 import Home from './Pages/Home';
+import Login from './Pages/Login';
+import Admin from './Pages/Admin';
+
 import {HomeFilled,PlusCircleFilled,ProfileFilled,
-  FileExcelFilled,CodeFilled, SaveFilled} from '@ant-design/icons';
+  LoginOutlined,CodeFilled, SaveFilled,DatabaseFilled} from '@ant-design/icons';
 
 const { Header, Content, Footer } = Layout;
 function App()
 {
+  const [hiddenAdminFlag,setHideAdminFlag] = useState<boolean>(true);
+  const admintLinkRef = useRef<HTMLAnchorElement>(null);
+  
 
   return (
     <Layout className="layout">
@@ -24,6 +30,9 @@ function App()
             <Menu.Item key="/Records"><Link to='/Records'><ProfileFilled />Records</Link></Menu.Item>
             <Menu.Item key="/api/UsageRecords/ExcelInterop"><a href='/api/UsageRecords/ExcelInterop' target="_blank"><SaveFilled />Excel</a></Menu.Item>
             <Menu.Item key="/DynamicQuery"><Link to='/DynamicQuery'><CodeFilled />Query</Link></Menu.Item>
+            <Menu.Item key="/Login" hidden={!hiddenAdminFlag}><Link to='/Login'><LoginOutlined />Login</Link></Menu.Item>
+            <Menu.Item key="/Admin" hidden={hiddenAdminFlag} 
+              ><Link ref={admintLinkRef} id='AdminMenuDom' to="/Admin"><DatabaseFilled />Admin</Link></Menu.Item>
           </Menu>
         </Header>
         <Content style={{ padding: '0 28px' }}>
@@ -39,6 +48,17 @@ function App()
               </Route>
               <Route exact path='/DynamicQuery'>
                 <DynamicQuery />
+              </Route>
+              <Route exact path='/Login'>
+                <Login OnLogin={()=>{
+                  setHideAdminFlag(false);
+                  admintLinkRef.current?.click();
+                  //const dom = document.getElementById('AdminMenuDom');
+                  //document.getElementById('AdminMenuDom')?.click();
+                  }}/>
+              </Route>
+              <Route exact path='/Admin'>
+                <Admin />
               </Route>
               <Route path='/'>
                 <Home />
