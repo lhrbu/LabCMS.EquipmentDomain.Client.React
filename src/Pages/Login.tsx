@@ -1,13 +1,15 @@
 import React from 'react';
 import { Button, Form, Input } from 'antd';
 import sha256 from 'crypto-js/sha256';
+import LoginCheckService from '../Services/LoginCheckService';
 
+const _loginCheckService = LoginCheckService.Instance();
 const Login:React.FC<{OnLogin?:(()=>void)}> = ({OnLogin})=>
 {
     return (
         <Form
             labelCol={{span:8}}
-            wrapperCol={{span:16}}
+            wrapperCol={{span:12}}
             onFinish={ValidateLogin}
             >
                 <Form.Item
@@ -46,6 +48,7 @@ const Login:React.FC<{OnLogin?:(()=>void)}> = ({OnLogin})=>
             window.alert("Wrong login information!");
         }else{
             OnLogin?.();
+            _loginCheckService.SetLogin();
             window.alert("Login Successful!");
         }
     }

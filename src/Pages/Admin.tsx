@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import { Button, Form, Input, Typography, Collapse } from 'antd';
 import ProjectsWebAPI from '../WebAPIs/ProjectsWebAPI';
 import ProjectsWebCacheService from '../Services/ProjectsWebCacheService';
@@ -9,6 +9,7 @@ import EquipmentHourlyRatesWebCacheService from '../Services/EquipmentHourlyRate
 import EquipmentHourlyRate from '../Models/EquipmentHourlyRate';
 
 import UsageRecordsWebAPI from '../WebAPIs/UsageRecordsWebAPI';
+import LoginCheckService from '../Services/LoginCheckService';
 
 const { Panel } = Collapse;
 
@@ -20,16 +21,22 @@ const _equipmentHourlyRatesWebAPI = new EquipmentHourlysRatesWebAPI();
 const _equipmentHourlyRatesWebCaceService = EquipmentHourlyRatesWebCacheService.Instance();
 
 const _usageRecordsWebAPI = new UsageRecordsWebAPI();
-
+const _loginCheckService = LoginCheckService.Instance();
 export default function Admin() {
-    return (
+
+    const [visibleFlag,setVisibleFlag] = useState<boolean>(false);
+    useEffect(()=>{
+        setVisibleFlag(_loginCheckService.LoginStatus());
+    });
+
+    return visibleFlag?(
 
         <Fragment>
             <Collapse accordion>
                 <Panel header="Add or update Project" key="AddProject">
                     <Form
                         labelCol={{ span: 8 }}
-                        wrapperCol={{ span: 16 }}
+                        wrapperCol={{ span: 12 }}
                         onFinish={OnProjectSubmitAsync}
                     >
                         <Form.Item
@@ -55,10 +62,32 @@ export default function Admin() {
                         </Form.Item>
                     </Form>
                 </Panel>
+
+                <Panel header="Delete Project" key="DeleteProject">
+                    <Form
+                        labelCol={{ span: 8 }}
+                        wrapperCol={{ span: 12 }}
+                        onFinish={OnProjectDeleteAsync}>
+                            <Form.Item
+                            label="Project Name."
+                            name="Name"
+                            rules={[{ required: true, message: 'Please input project Name!' }]}
+                        >
+                            <Input />
+                        </Form.Item>
+                        <Form.Item
+                            wrapperCol={{ offset: 8, span: 16 }}
+                        >
+                            <Button type="primary" danger htmlType="submit">Delete</Button>
+                        </Form.Item>
+
+                   </Form>
+                </Panel>
+
                 <Panel header="Add or update Equipment Hourly Rate" key="AddEquipmentHourlyRate">
                 <Form
                         labelCol={{ span: 8 }}
-                        wrapperCol={{ span: 16 }}
+                        wrapperCol={{ span: 12 }}
                         onFinish={OnEquipmentHourlyRateSubmitAsync}
                     >
                         <Form.Item
@@ -98,10 +127,31 @@ export default function Admin() {
                         </Form.Item>
                     </Form>
                 </Panel>
+
+                <Panel header="Delete Equipment Hourly Rate" key="DeleteEquipmentHourlyRate">
+                <Form
+                        labelCol={{ span: 8 }}
+                        wrapperCol={{ span: 12 }}
+                        onFinish={OnEquipmentHourlyRateDeleteAsync}>
+                            <Form.Item
+                            label="Equipment No."
+                            name="No"
+                            rules={[{ required: true, message: 'Please input equipment No!' }]}
+                        >
+                            <Input />
+                        </Form.Item>
+                        <Form.Item
+                            wrapperCol={{ offset: 8, span: 16 }}
+                        >
+                            <Button type="primary" danger htmlType="submit">Delete</Button>
+                        </Form.Item>
+
+                   </Form>
+                </Panel>
             </Collapse>
 
         </Fragment>
-    )
+    ):<div style={{margin:'128px,256px'}}>Not Authorized to view this page!</div>;
 
     async function OnProjectSubmitAsync(values: any) {
         const project = Object.assign(new Project(), values);
@@ -125,6 +175,26 @@ export default function Admin() {
         window.alert('Add successfully!');
     }
 
+    async function OnProjectDeleteAsync(values:any) {
+        if(_projectsWebCacheService.CachedProjects.find(item=>item.FullName===values.Name))
+        {
+            if(window.confirm("Sure to delete the project?"))
+            {
+                try{
+                    await _projectsWebAPI.DeleteByNameAsync(values.Name);
+                    await _projectsWebCacheService.RefreshCacheAsync();
+                    await _usageRecordsWebAPI.ReloadCacheAsync();
+                    window.alert("Delete successful!");
+                }catch(error)
+                {
+                    window.alert("Server internal error, can't delete the project!");
+                }
+            }
+        }else{
+            window.alert("Project name doesn't exist!");
+        }
+    }
+
     async function OnEquipmentHourlyRateSubmitAsync(values:any)
     {
         
@@ -145,4 +215,26 @@ export default function Admin() {
         await _usageRecordsWebAPI.ReloadCacheAsync();
         window.alert('Add successfully!');
     }
+
+    async function OnEquipmentHourlyRateDeleteAsync(values:any) {
+        if(_equipmentHourlyRatesWebCaceService.CachedEquipmentHourlyRates.find(item=>item.EquipmentNo===values.No))
+        {
+            if(window.confirm("Sure to delete the equipment hourly rate?"))
+            {
+                try{
+                    await _equipmentHourlyRatesWebAPI.DeleteByIdAsync(values.No);
+                    await _equipmentHourlyRatesWebCaceService.RefreshCacheAsync();
+                    await _usageRecordsWebAPI.ReloadCacheAsync();
+                    window.alert("Delete successful!");
+                }catch(error)
+                {
+                    window.alert("Server internal error, can't delete the equipment hourly rate!");
+                }
+            }
+        }else{
+            window.alert("Equipment No doesn't exist!");
+        }
+    }
+
+    
 }

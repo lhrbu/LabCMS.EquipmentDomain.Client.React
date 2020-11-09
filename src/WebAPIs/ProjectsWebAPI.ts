@@ -16,4 +16,9 @@ export default class ProjectsWebAPI
     {
         await Axios.put(this._url,project,{params:{date:new Date()}});
     }
+    public async DeleteByNameAsync(name:string)
+    {
+        const nameUrl:string = encodeURI(`${this._url}/${name}`);
+        await Axios.delete(nameUrl);
+    }
 }

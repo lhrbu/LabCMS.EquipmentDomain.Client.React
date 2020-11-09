@@ -18,4 +18,9 @@ export default class EquipmentHourlysRatesWebAPI
     {
         await Axios.put(this._url,equipmentHourlyRate,{params:{date:new Date()}});
     }
+    public async DeleteByIdAsync(id:string)
+    {
+        const idUrl:string = encodeURI(`${this._url}/${id}`);
+        await Axios.delete(idUrl);
+    }
 }

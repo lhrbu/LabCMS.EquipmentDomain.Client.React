@@ -142,7 +142,12 @@ const UsageRecordEditor: React.FC<{
                 const usageRecord: UsageRecord = Object.assign(new UsageRecord(), values);
                 usageRecord.StartTime = _timeFormateValidateHelper.GetTimeStampValue(values.StartTimeString);
                 usageRecord.EndTime = _timeFormateValidateHelper.GetTimeStampValue(values.EndTimeString);
-                await OnSubmit?.(usageRecord);
+                if(usageRecord.StartTime && usageRecord.EndTime)
+                {
+                    await OnSubmit?.(usageRecord);
+                }else{
+                    window.alert("Wrong date time format!");
+                }
             }finally{
                 setSubmitButtonLoading(false);
             }

@@ -17,7 +17,7 @@ export default class UsageRecord
         if(usageRecord.StartTime!=null && usageRecord.EndTime!=null){
             return (usageRecord.EndTime - usageRecord.StartTime)/3600
         }else{
-            throw new Error("Wrong Timestamp format");
+            throw new Error(`${usageRecord.TestNo} with wrong Timestamp format`);
         }
     }
 }
