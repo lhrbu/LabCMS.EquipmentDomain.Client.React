@@ -7,11 +7,12 @@ import UsageRecordsWebAPI from '../WebAPIs/UsageRecordsWebAPI';
 import UsageRecordEditor from '../Components/UsageRecordEditor';
 import UsageRecordLocalCacheService from '../Services/UsageRecordLocalCacheService';
 import Project from '../Models/Project';
+import Moment from 'moment';
+import './HeaderBar.css';
 
 const distinct = require('distinct');
 const {Column} = Table;
 
-const _tableHeader = <div style={{backgroundColor:"#305496",color:"white",padding:"0.5rem"}}>HJL-NL-DV Test equipment usage record 2020</div>
 const _pageSize = 12;
 
 
@@ -40,7 +41,7 @@ export default function Records()
     return (
         <Fragment>
             
-            {_tableHeader}
+        <div className="HeaderBar">HJL-NL-TI-V Test equipment usage record {Moment().year()}</div>
             <Table
                 dataSource={usageRecords} 
                 loading={tableLoading}
