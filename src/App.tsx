@@ -8,9 +8,10 @@ import DynamicQuery from './Pages/DynamicQuery';
 import Home from './Pages/Home';
 import Login from './Pages/Login';
 import Admin from './Pages/Admin';
+import Visualize from './Pages/Visualize';
 
 import {HomeFilled,PlusCircleFilled,ProfileFilled,
-  LoginOutlined,CodeFilled, SaveFilled,DatabaseFilled} from '@ant-design/icons';
+  LoginOutlined,CodeFilled, SaveFilled,DatabaseFilled,BarChartOutlined} from '@ant-design/icons';
 
 const { Header, Content, Footer } = Layout;
 function App()
@@ -29,6 +30,7 @@ function App()
             <Menu.Item key="/AddRecord"><Link to='/AddRecord'><PlusCircleFilled />Add Record</Link></Menu.Item>
             <Menu.Item key="/Records"><Link to='/Records'><ProfileFilled />Records</Link></Menu.Item>
             <Menu.Item key="/api/UsageRecords/ExcelInterop"><a href='/api/UsageRecords/ExcelInterop' target="_blank"><SaveFilled />Excel</a></Menu.Item>
+            <Menu.Item key="/Visualize"><Link to='/Visualize'><BarChartOutlined />Visualize</Link></Menu.Item>
             <Menu.Item key="/DynamicQuery"><Link to='/DynamicQuery'><CodeFilled />Query</Link></Menu.Item>
             <Menu.Item key="/Login" hidden={!hiddenAdminFlag}><Link to='/Login'><LoginOutlined />Login</Link></Menu.Item>
             <Menu.Item key="/Admin" hidden={hiddenAdminFlag} 
@@ -59,6 +61,9 @@ function App()
               </Route>
               <Route exact path='/Admin'>
                 <Admin />
+              </Route>
+              <Route exact path='/Visualize'>
+                <Visualize />
               </Route>
               <Route path='/'>
                 <Home />

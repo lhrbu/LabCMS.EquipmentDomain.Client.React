@@ -16,6 +16,8 @@ import UsageRecordDyamicQueryWebAPI from '../WebAPIs/UsageRecordsDynamicQueryWeb
 const { Text,Paragraph } = Typography;
 const { Panel } = Collapse;
 
+const sLeft = "<";
+const sRight=">";
 export default function DynamicQuery()
 {
     const [collapseKey,setCollapseKey]=useState<string[]>(['QueryCodePanel']);
@@ -40,7 +42,7 @@ export default function DynamicQuery()
                     <Paragraph keyboard>......</Paragraph>
                     <Paragraph />
                     <Paragraph><Text type="danger">// The return type must be a collection type!</Text></Paragraph>
-                    <Paragraph keyboard>public dynamic DynamicQuery(IEnumerable usageRecords)</Paragraph>
+                    <Paragraph keyboard>public dynamic DynamicQuery(IEnumerable{sLeft}UsageRecord{sRight} usageRecords)</Paragraph>
                     <Paragraph keyboard>{"{"}</Paragraph>
                     <TextArea autoSize={{ minRows: 4 }} value={code} onChange={e => setCode(e.target.value)} />
                     <Paragraph keyboard>{"}"}</Paragraph>
